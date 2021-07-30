@@ -2,12 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const { createLoader } = require('simple-functional-loader');
-const { parse, tokenizers } = require('comment-parser/lib');
+const { parse, tokenizers } = require('comment-parser');
 
-const PLUGIN_NAME = 'HttpRequestMockMockPlugin';
-module.exports = class HttpRequestMockMockPlugin {
+const PLUGIN_NAME = 'XhrResponseMockMockPlugin';
+module.exports = class XhrResponseMockMockPlugin {
   /**
-   * http-request-mock parameters
+   * xhr-response-mock parameters
    *
    * @param {RegExp} entry Required, entry file which mock dependencies will be injected into.
    * @param {string} dir Required, mock directory which contains all mock files & the runtime mock configure file.
@@ -29,15 +29,15 @@ module.exports = class HttpRequestMockMockPlugin {
     transpile = true,
   }) {
     if (!(entry instanceof RegExp)) {
-      throw new Error('The HttpRequestMockMockPlugin expects [entry] to be a valid RegExp Object.');
+      throw new Error('The XhrResponseMockMockPlugin expects [entry] to be a valid RegExp Object.');
     }
 
     if (!dir || !path.isAbsolute(dir) || !fs.existsSync(dir)) {
-      throw new Error('The HttpRequestMockMockPlugin expects [dir] to be a valid absolute dir.');
+      throw new Error('The XhrResponseMockMockPlugin expects [dir] to be a valid absolute dir.');
     }
 
     if (!['internal', 'external', 'verbose'].includes(runtime)) {
-      throw new Error('The HttpRequestMockMockPlugin expects [runtime] to be one of [internal, external, verbose].');
+      throw new Error('The XhrResponseMockMockPlugin expects [runtime] to be one of [internal, external, verbose].');
     }
 
     this.entry = entry;
@@ -276,9 +276,8 @@ module.exports = class HttpRequestMockMockPlugin {
     const isExisted = fs.existsSync(runtime);
     const codes = [
       `/* eslint-disable */`,
-      // `import HttpRequestMock from 'xhr-response-mock';`,
-      `import HttpRequestMock from '/Users/hu/web/xhr-response-mock-github/dist/index.js';`,
-      `HttpRequestMock.setup().setMockData(process.env.HRM_MOCK_DATA || {});`,
+      `import XhrResponseMock from 'xhr-response-mock';`,
+      `XhrResponseMock.setup().setMockData(process.env.HRM_MOCK_DATA || {});`,
       `/* eslint-enable */`,
     ].join('\n');
 
@@ -296,13 +295,9 @@ module.exports = class HttpRequestMockMockPlugin {
   generateVerboseRuntimeDepsFile() {
     const runtime = path.resolve(this.dir, '.runtime.js');
     const isExisted = fs.existsSync(runtime);
-    if (!forceToUpdate && fs.existsSync(runtime)) return runtime;
 
     const files = this.getAllMockFiles();
-    const codes = [
-      '/* eslint-disable */',
-      `import HttpRequestMock from 'http-request-mock';`
-    ];
+    const codes = [ '/* eslint-disable */' ];
     const items = [];
     for (let i = 0; i < files.length; i += 1) {
       const file = files[i];
@@ -320,12 +315,14 @@ module.exports = class HttpRequestMockMockPlugin {
       codes.push(`import data${i} from '${file}';`);
       items.push({ url: tags.url, method, index: i, delay, status, header, });
     }
-    codes.push('const mocker = HttpRequestMock.setup();');
+    codes.push(`import XhrResponseMock from 'xhr-response-mock';`);
+    codes.push('const mocker = XhrResponseMock.setup();');
     for (const item of items) {
       const response = `data${item.index}`;
       const url = typeof item.url === 'object' ? item.url : `'${item.url}'`;
       const header = JSON.stringify(item.header, null, 2);
-      codes.push(`mocker.${item.method}(${url}, ${response}, ${item.delay}, ${item.status}, ${header});`);
+      const args = [response, item.delay, item.status, header].join(', ');
+      codes.push(`mocker.${item.method}(\n  ${url},\n  ${args}\n);`);
     }
     codes.push('/* eslint-enable */');
     const codeSource = codes.join('\n');

@@ -1,9 +1,9 @@
 import { expect } from '@jest/globals';
 import axios from 'axios';
 import path from 'path';
-import HttpRequestMock from '../src/index';
+import XhrResponseMock from '../src/index';
 
-const mocker = HttpRequestMock.setupForUnitTest('xhr');
+const mocker = XhrResponseMock.setupForUnitTest('xhr');
 process.env.HRM_MOCK_DIR = path.resolve(__dirname, './mock');
 
 describe('dynamically import mock config file', () => {

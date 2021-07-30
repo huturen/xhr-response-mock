@@ -1,6 +1,6 @@
-import HttpRequestMock from '../src/index';
+import XhrResponseMock from '../src/index';
 
-const mocker = HttpRequestMock.setupForUnitTest('wx.request');
+const mocker = XhrResponseMock.setupForUnitTest('wx');
 
 const request = (url, method = 'get', opts = {}) => {
   return new Promise((resolve) => {

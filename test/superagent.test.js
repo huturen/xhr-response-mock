@@ -1,7 +1,7 @@
 import * as superagent from 'superagent/dist/superagent.js';
-import HttpRequestMock from '../src/index';
+import XhrResponseMock from '../src/index';
 
-const mocker = HttpRequestMock.setupForUnitTest('xhr');
+const mocker = XhrResponseMock.setupForUnitTest('xhr');
 
 const request = (url, method = 'get') => {
   if (!/^(get|post|put|patch|delete)$/i.test(method)) {

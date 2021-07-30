@@ -1,8 +1,8 @@
 // run `npm run build` before running the command below
 // npm run build && node experiment/node.js
-const HttpRequestMock = require('../dist/index').default;
-// const HttpRequestMock = require('http-request-mock').default;
-const mocker = HttpRequestMock.setupForUnitTest('all');
+const XhrResponseMock = require('../dist/index').default;
+// const XhrResponseMock = require('xhr-response-mock').default;
+const mocker = XhrResponseMock.setupForUnitTest('all');
 
 const axios = require('axios');
 const assert = require('assert');
